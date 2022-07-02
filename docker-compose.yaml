@@ -15,5 +15,16 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/api
+    depends_on:
+      - postgres
     ports:
       - "8000:8000"
+    command:
+      - /bin/bash
+      - -ce
+      - |
+        for i in 1 1 2 0; do
+          /api/scripts/migrate.sh && break || sleep "$$i"
+        done
+        
+        exec /api/scripts/run_server.sh

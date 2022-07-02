@@ -4,3 +4,4 @@
 .dockerignore
 Dockerfile
 __pycache__
+docker-compose.yaml

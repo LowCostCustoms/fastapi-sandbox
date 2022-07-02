@@ -1,5 +1,6 @@
 import asyncio
 from logging.config import fileConfig
+import os
 
 from alembic import context
 from sqlalchemy import engine_from_config
@@ -12,6 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from api.models import Base
 
 config = context.config
+
+database_url = os.environ.get("DATABASE_URL") or "postgresql+asyncpg://postgres:postgres@localhost:5432/api"
+config.set_section_option(config.config_ini_section, "sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
