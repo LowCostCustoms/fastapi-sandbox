@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        entry: black
+        language: system
+        pass_filenames: true
+        types: [python]
+      - id: isort
+        name: isort
+        entry: isort
+        language: system
+        pass_filenames: true
+        types: [python]
