@@ -1,9 +1,7 @@
 from datetime import datetime
 from datetime import timedelta
 from enum import Enum
-from typing import Generic
-from typing import List
-from typing import TypeVar
+from typing import Generic, List, TypeVar
 from uuid import UUID
 
 import pydantic

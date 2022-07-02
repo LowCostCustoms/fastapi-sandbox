@@ -26,24 +26,24 @@ run_tags = ["JobRun"]
 
 
 def get_pagination_params(
-        offset: int = 0,
-        limit: int = 100,
-        sort_order: SortOrder = SortOrder.ASCENDING,
+    offset: int = 0,
+    limit: int = 100,
+    sort_order: SortOrder = SortOrder.ASCENDING,
 ) -> PaginationParamsDto:
     return PaginationParamsDto(offset=offset, limit=limit, sort_order=sort_order)
 
 
 def get_job_query_params(
-        base: PaginationParamsDto = Depends(get_pagination_params),
-        sort: JobSortField | None = None,
+    base: PaginationParamsDto = Depends(get_pagination_params),
+    sort: JobSortField | None = None,
 ) -> JobQueryParamsDto:
     return JobQueryParamsDto(offset=base.offset, limit=base.limit, sort_order=base.sort_order, sort=sort)
 
 
 def get_job_run_query_params(
-        base: PaginationParamsDto = Depends(get_pagination_params),
-        sort: JobRunSortField | None = None,
-        assignable_only: bool = False,
+    base: PaginationParamsDto = Depends(get_pagination_params),
+    sort: JobRunSortField | None = None,
+    assignable_only: bool = False,
 ) -> JobRunQueryParamsDto:
     return JobRunQueryParamsDto(
         offset=base.offset,
@@ -56,8 +56,8 @@ def get_job_run_query_params(
 
 @router.get("/v1/jobs", response_model=Page[JobDto], tags=job_tags)
 async def list_jobs(
-        params: JobQueryParamsDto = Depends(get_job_query_params),
-        service: JobService = Depends(JobService),
+    params: JobQueryParamsDto = Depends(get_job_query_params),
+    service: JobService = Depends(JobService),
 ) -> Page[JobDto]:
     return await service.list_jobs(params)
 
@@ -74,8 +74,8 @@ async def create_job(request: JobRequestDto = Body(), service: JobService = Depe
 
 @router.get("/v1/runs", response_model=Page[JobRunDto], tags=run_tags)
 async def list_runs(
-        params: JobRunQueryParamsDto = Depends(get_job_run_query_params),
-        service: JobRunService = Depends(JobRunService),
+    params: JobRunQueryParamsDto = Depends(get_job_run_query_params),
+    service: JobRunService = Depends(JobRunService),
 ) -> Page[JobRunDto]:
     return await service.list_runs(params)
 
@@ -87,17 +87,17 @@ async def get_run(id: UUID, service: JobRunService = Depends(JobRunService)) -> 
 
 @router.post("/v1/runs/{id}/assign", response_model=JobRunDto, tags=run_tags)
 async def assign_run(
-        id: UUID,
-        request: AssignJobRunDto = Body(),
-        service: JobRunService = Depends(JobRunService),
+    id: UUID,
+    request: AssignJobRunDto = Body(),
+    service: JobRunService = Depends(JobRunService),
 ) -> JobRunDto:
     return await service.assign_run(id, request)
 
 
 @router.post("/v1/runs/{id}/complete", response_model=JobRunDto, tags=run_tags)
 async def complete_run(
-        id: UUID,
-        request: CompleteJobRunDto = Body(),
-        service: JobRunService = Depends(JobRunService),
+    id: UUID,
+    request: CompleteJobRunDto = Body(),
+    service: JobRunService = Depends(JobRunService),
 ) -> JobRunDto:
     return await service.complete_run(id, request)

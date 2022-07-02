@@ -1,14 +1,12 @@
 import contextlib
 import contextvars
 import functools
-from typing import Any
-from typing import Tuple
-from typing import TypeVar
+from typing import Any, Tuple, TypeVar
 
 import sqlalchemy as sa
-import sqlalchemy.orm as sao
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
+import sqlalchemy.orm as sao
 
 from api.config import DATABASE_URL
 

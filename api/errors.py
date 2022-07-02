@@ -25,10 +25,7 @@ class RunCompletionFailed(RuntimeError):
 
 
 def default_error_response(status: int, ex: Exception) -> Response:
-    return JSONResponse(
-        status_code=status,
-        content=jsonable_encoder(ErrorResponseDto(detail=str(ex)))
-    )
+    return JSONResponse(status_code=status, content=jsonable_encoder(ErrorResponseDto(detail=str(ex))))
 
 
 def register_error_handlers(app: FastAPI):

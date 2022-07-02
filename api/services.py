@@ -2,22 +2,22 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-import sqlalchemy as sa
-import sqlalchemy.orm as sao
 from crontab import CronTab
 from fastapi import Depends
+import sqlalchemy as sa
+import sqlalchemy.orm as sao
 
 from api.db import get_current_session
 from api.db import transactional
 from api.dto import AssignJobRunDto
 from api.dto import CompleteJobRunDto
 from api.dto import JobDto
+from api.dto import JobQueryParamsDto
 from api.dto import JobRequestDto
 from api.dto import JobRunDto
 from api.dto import JobRunQueryParamsDto
 from api.dto import JobSortField
 from api.dto import Page
-from api.dto import JobQueryParamsDto
 from api.errors import InvalidCronExpressionError
 from api.errors import NotFoundError
 from api.errors import RunAssignmentFailed
@@ -57,38 +57,44 @@ class JobRunService:
 
     @transactional
     async def assign_run(self, id: UUID, request: AssignJobRunDto) -> JobRunDto:
-        query = sa.update(
-            JobRun,
-        ).values(
-            assigned_to=request.worker,
-            assigned_until=sa.func.now() + sa.literal(request.lease_duration, sa.Interval()),
-            status=JobRunStatus.IN_PROGRESS,
-        ).where(
-            sa.and_(
-                JobRun.id == id,
-                sa.or_(
-                    JobRun.assigned_to == None,
-                    JobRun.assigned_to == request.worker,
-                    JobRun.assigned_until == None,
-                    JobRun.assigned_until < sa.func.now(),
+        query = (
+            sa.update(
+                JobRun,
+            )
+            .values(
+                assigned_to=request.worker,
+                assigned_until=sa.func.now() + sa.literal(request.lease_duration, sa.Interval()),
+                status=JobRunStatus.IN_PROGRESS,
+            )
+            .where(
+                sa.and_(
+                    JobRun.id == id,
+                    sa.or_(
+                        JobRun.assigned_to == None,
+                        JobRun.assigned_to == request.worker,
+                        JobRun.assigned_until == None,
+                        JobRun.assigned_until < sa.func.now(),
+                    ),
+                    sa.or_(
+                        JobRun.scheduled_at == None,
+                        JobRun.scheduled_at <= sa.func.now(),
+                    ),
+                    JobRun.status.in_([JobRunStatus.SCHEDULED, JobRunStatus.IN_PROGRESS]),
                 ),
-                sa.or_(
-                    JobRun.scheduled_at == None,
-                    JobRun.scheduled_at <= sa.func.now(),
-                ),
-                JobRun.status.in_([JobRunStatus.SCHEDULED, JobRunStatus.IN_PROGRESS]),
-            ),
-        ).returning(
-            JobRun.id,
-            JobRun.job_id,
-            JobRun.job_schedule_id,
-            JobRun.scheduled_at,
-            JobRun.assigned_to,
-            JobRun.assigned_until,
-            JobRun.status,
-            JobRun.result,
-        ).execution_options(
-            synchronize_session=False,
+            )
+            .returning(
+                JobRun.id,
+                JobRun.job_id,
+                JobRun.job_schedule_id,
+                JobRun.scheduled_at,
+                JobRun.assigned_to,
+                JobRun.assigned_until,
+                JobRun.status,
+                JobRun.result,
+            )
+            .execution_options(
+                synchronize_session=False,
+            )
         )
 
         row = (await get_current_session().execute(query)).one_or_none()
@@ -99,30 +105,36 @@ class JobRunService:
 
     @transactional
     async def complete_run(self, id: UUID, request: CompleteJobRunDto) -> JobRunDto:
-        query = sa.update(
-            JobRun,
-        ).values(
-            status=JobRunStatus.COMPLETED,
-            result=request.result,
-            completed_at=sa.func.now(),
-        ).where(
-            sa.and_(
-                JobRun.id == id,
-                JobRun.status == JobRunStatus.IN_PROGRESS,
-                JobRun.assigned_to == request.worker,
-                JobRun.assigned_until >= sa.func.now(),
-            ),
-        ).returning(
-            JobRun.id,
-            JobRun.job_id,
-            JobRun.job_schedule_id,
-            JobRun.scheduled_at,
-            JobRun.assigned_to,
-            JobRun.assigned_until,
-            JobRun.status,
-            JobRun.result,
-        ).execution_options(
-            synchronize_session=False,
+        query = (
+            sa.update(
+                JobRun,
+            )
+            .values(
+                status=JobRunStatus.COMPLETED,
+                result=request.result,
+                completed_at=sa.func.now(),
+            )
+            .where(
+                sa.and_(
+                    JobRun.id == id,
+                    JobRun.status == JobRunStatus.IN_PROGRESS,
+                    JobRun.assigned_to == request.worker,
+                    JobRun.assigned_until >= sa.func.now(),
+                ),
+            )
+            .returning(
+                JobRun.id,
+                JobRun.job_id,
+                JobRun.job_schedule_id,
+                JobRun.scheduled_at,
+                JobRun.assigned_to,
+                JobRun.assigned_until,
+                JobRun.status,
+                JobRun.result,
+            )
+            .execution_options(
+                synchronize_session=False,
+            )
         )
 
         row = (await get_current_session().execute(query)).one_or_none()

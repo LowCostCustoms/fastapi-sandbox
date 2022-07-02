@@ -1,6 +1,6 @@
-import uuid
 from datetime import datetime
 from enum import Enum
+import uuid
 
 import sqlalchemy as sa
 import sqlalchemy.dialects.postgresql as sap
@@ -62,10 +62,10 @@ class JobRun(Base):
 
     @classmethod
     def create(
-            cls,
-            job: Job,
-            job_schedule: JobSchedule | None = None,
-            scheduled_at: datetime | None = None,
+        cls,
+        job: Job,
+        job_schedule: JobSchedule | None = None,
+        scheduled_at: datetime | None = None,
     ) -> "JobRun":
         return cls(
             id=uuid.uuid4(),
