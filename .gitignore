@@ -1,0 +1,4 @@
+.idea
+*.iml
+requests.http
+__pycache__
