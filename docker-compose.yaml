@@ -24,7 +24,12 @@ services:
       - -ce
       - |
         for i in 1 1 2 0; do
-          /api/scripts/migrate.sh && break || sleep "$$i"
+          /api/scripts/migrate.sh && break
+          if [ "$$i" == "0" ]; then
+            echo "Postgres server didn't respond in time" && exit 1
+          fi
+        
+          sleep "$$i"
         done
         
         exec /api/scripts/run_server.sh
